@@ -1,4 +1,5 @@
 import { createSelector } from 'reselect';
+import selectNavigationContainer from '../NavigationContainer/selectors';
 
 /**
  * Direct selector to the linkListContainer state domain
@@ -9,14 +10,29 @@ const selectLinkListContainerDomain = () => state => state.get('linkListContaine
  * Other specific selectors
  */
 
+const selectRouteTopic = () => (state, props) =>
+  props.params.topicName;
 
+const selectTopic = () => createSelector(
+  selectNavigationContainer(),
+  selectRouteTopic(),
+  (navigationState, routeTopicName) => {
+    const selectedTopic = navigationState.topics.find(t => t.name === routeTopicName);
+
+    return selectedTopic || {
+      name: '',
+    };
+  }
+);
 /**
  * Default selector used by LinkListContainer
  */
 
 const selectLinkListContainer = () => createSelector(
   selectLinkListContainerDomain(),
-  (substate) => substate.toJS()
+  selectTopic(),
+  (substate, topic) =>
+  Object.assign(substate.toJS(), { topicName: topic.name })
 );
 
 export default selectLinkListContainer;
